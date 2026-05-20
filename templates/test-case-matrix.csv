@@ -1,6 +1,13 @@
 ID,Folder,Endpoint,Method,Scenario,Input file/body,Expected status,Expected response check,Type,Pass/Fail,Evidence
-TC01,Functional,/health,GET,Service is alive,-,200,status=ok,functional,,
-TC02,Functional,/readings,POST,Create reading happy path,mock-data/sensor-reading-valid.json,201,"has reading_id, accepted=true",functional,,
-TC03,Negative,/readings,POST,Missing device_id,mock-data/sensor-reading-invalid-missing-device.json,400,Problem Details,negative,,
-TC04,Auth,/readings,POST,Missing token,mock-data/sensor-reading-valid.json,401,Problem Details,auth,,
-TC05,Boundary,/readings,POST,High temperature boundary,mock-data/sensor-reading-boundary.json,201/400,documented behavior,boundary,,
+TC01,Functional,/health,GET,Service is alive,-,200,"status=ok, service exists",functional,Pass,reports/newman-report-mock.xml
+TC02,Functional,/vision/detect,POST,Create detection happy path,mock-data/detection-valid.json,202,"has detectionId, status=PROCESSING",functional,Pass,reports/newman-report-mock.xml
+TC03,Functional,/vision/detections/{detectionId},GET,Read detection detail,collection variable detectionId,200,"has status and confidence",functional,Pass,reports/newman-report-mock.xml
+TC04,Functional,/vision/models/info,GET,Read model info,-,200,"has modelName and maxImageSizeBytes",functional,Pass,reports/newman-report-mock.xml
+TC05,Auth,/vision/detect,POST,Missing token,mock-data/detection-valid.json,401/403 (local),"auth rejected on local; mock skipped",auth,Pass,reports/newman-report-mock.xml
+TC06,Auth,/vision/detect,POST,Invalid token,mock-data/detection-valid.json,401/403 (local),"auth rejected on local; mock skipped",auth,Pass,reports/newman-report-mock.xml
+TC07,Negative,/vision/detect,POST,Missing required requestId,mock-data/detection-invalid-missing-requestId.json,400/422,"ProblemDetails.status in 4xx",negative,Pass,reports/newman-report-mock.xml
+TC08,Negative,/vision/detect,POST,Wrong enum sourceType,inline body BAD sourceType,400/422,"client error returned",negative,Pass,reports/newman-report-mock.xml
+TC09,Boundary,/vision/detect,POST,motionLevel max boundary accepted,mock-data/detection-boundary-motionlevel.json,202,"request accepted",boundary,Pass,reports/newman-report-mock.xml
+TC10,Boundary,/vision/detect,POST,motionLevel above max rejected,inline body motionLevel=1.1,400/422,"client error returned",boundary,Pass,reports/newman-report-mock.xml
+TC11,Reliability,/vision/models/info,GET,Latency threshold local,-,200,"response time < 1000ms on local",reliability,Pass,reports/newman-report-local.xml
+TC12,Consumer_side_Smoke,/health (IoT mock),GET,Consumer can call dependency mock,-,200,"dependency mock reachable and parsable",consumer-smoke,Pass,reports/newman-report-mock.xml
